@@ -7,9 +7,12 @@ from pretix.control.signals import nav_event
 
 @receiver(register_html_mail_renderers, dispatch_uid="gultix_sponsors_mail_renderers")
 def register_mail_renderers(sender, **kwargs):
-    from .email import GultixSponsorsMailRenderer
+    from .email import (
+        GultixSponsorsMailRenderer,
+        GultixSponsorsSimpleLogoMailRenderer,
+    )
 
-    return [GultixSponsorsMailRenderer]
+    return [GultixSponsorsMailRenderer, GultixSponsorsSimpleLogoMailRenderer]
 
 
 @receiver(nav_event, dispatch_uid="gultix_sponsors_nav_event")

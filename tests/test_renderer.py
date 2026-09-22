@@ -4,7 +4,10 @@ from django.utils import timezone
 from html.parser import HTMLParser
 from pretix.base.models import Event, Organizer
 
-from gultix_sponsors.email import GultixSponsorsMailRenderer
+from gultix_sponsors.email import (
+    GultixSponsorsMailRenderer,
+    GultixSponsorsSimpleLogoMailRenderer,
+)
 from gultix_sponsors.models import Sponsor, SponsorTier
 from gultix_sponsors.signals import nav_event_link
 
@@ -36,27 +39,56 @@ class RendererTestMixin:
             logo=SimpleUploadedFile("logo.png", PNG, content_type="image/png"),
         )
 
+    renderer_class = GultixSponsorsMailRenderer
+
     def render(self, event, body="Hello body", signature="Best regards"):
-        return GultixSponsorsMailRenderer(event).render(
+        return self.renderer_class(event).render(
             body, signature, "Subject", None, None, None
         )
 
 
 class RendererRegistrationTest(RendererTestMixin, TestCase):
-    def test_renderer_registered_when_plugin_enabled(self):
+    def test_renderers_registered_when_plugin_enabled(self):
         event = self.make_event()
         event.plugins = "gultix_sponsors"
         event.save()
         renderers = event.get_html_mail_renderers()
         self.assertIn("gultix_sponsors", renderers)
+        self.assertIn("gultix_sponsors_simple_logo", renderers)
         self.assertIsInstance(renderers["gultix_sponsors"], GultixSponsorsMailRenderer)
+        self.assertIsInstance(
+            renderers["gultix_sponsors_simple_logo"],
+            GultixSponsorsSimpleLogoMailRenderer,
+        )
 
-    def test_renderer_not_registered_when_plugin_disabled(self):
+    def test_renderers_not_registered_when_plugin_disabled(self):
         event = self.make_event()
         renderers = event.get_html_mail_renderers()
         self.assertNotIn("gultix_sponsors", renderers)
+        self.assertNotIn("gultix_sponsors_simple_logo", renderers)
         # core renderers stay untouched
         self.assertIn("classic", renderers)
+        self.assertIn("simple_logo", renderers)
+
+    def test_renderer_identifiers_and_config_stable(self):
+        # original renderer must keep its identity; the new one is distinct
+        self.assertEqual(GultixSponsorsMailRenderer.identifier, "gultix_sponsors")
+        self.assertEqual(
+            GultixSponsorsMailRenderer.template_name,
+            "gultix_sponsors/email/sponsors_wrapper.html",
+        )
+        self.assertEqual(
+            GultixSponsorsSimpleLogoMailRenderer.identifier,
+            "gultix_sponsors_simple_logo",
+        )
+        self.assertEqual(
+            GultixSponsorsSimpleLogoMailRenderer.template_name,
+            "gultix_sponsors/email/simple_logo_sponsors.html",
+        )
+        self.assertEqual(
+            GultixSponsorsSimpleLogoMailRenderer.thumbnail_filename,
+            "pretixbase/email/thumb_simple_logo.png",
+        )
 
 
 class RendererRenderingTest(RendererTestMixin, TestCase):
@@ -251,6 +283,47 @@ class RendererStressMatrixTest(RendererTestMixin, TestCase):
         self.assertEqual(footer.count("word-wrap: break-word"), 2)
         self.assertIn("overflow-wrap: break-word", footer)
         self.assertIn("X" * 190, footer)
+
+
+class SimpleLogoRendererRenderingTest(RendererRenderingTest):
+    """The full classic-layout suite, rerun against the simple-with-logo
+    layout, so both designs keep identical sponsor-footer semantics."""
+
+    renderer_class = GultixSponsorsSimpleLogoMailRenderer
+
+
+class SimpleLogoRendererStressMatrixTest(RendererStressMatrixTest):
+    renderer_class = GultixSponsorsSimpleLogoMailRenderer
+
+
+class SimpleLogoRendererTest(RendererTestMixin, TestCase):
+    """Behavior specific to the simple-with-logo variant."""
+
+    renderer_class = GultixSponsorsSimpleLogoMailRenderer
+
+    def test_event_logo_retained_with_sponsors(self):
+        from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+
+        event = self.make_event()
+        stored = default_storage.save(
+            "pub/gultix-sponsors-tests/event-logo.png", ContentFile(PNG)
+        )
+        event.settings.logo_image = default_storage.open(stored)
+        tier = SponsorTier.objects.create(event=event, name="Gold")
+        self.make_sponsor(tier, "Acme")
+        html = self.render(event)
+        # the layout's own logo header row survives next to the sponsor footer
+        self.assertIn('alt="Event t"', html)
+        self.assertIn("gultix-sponsors", html)
+        self.assertLess(html.index('alt="Event t"'), html.index("gultix-sponsors"))
+
+    def test_no_event_logo_no_logo_row(self):
+        event = self.make_event()
+        html = self.render(event)
+        self.assertNotIn('alt="Event t"', html)
+        # the header still names the event as a plain link
+        self.assertIn("Event t", html)
 
 
 class NavSignalTest(TestCase):

@@ -1,17 +1,12 @@
 from django.utils.translation import gettext_lazy
-from pretix.base.email import ClassicMailRenderer
+from pretix.base.email import ClassicMailRenderer, UnembellishedMailRenderer
 
 
-class GultixSponsorsMailRenderer(ClassicMailRenderer):
-    """Classic renderer plus a sponsor footer below the signature (or body).
+class SponsorFooterMixin:
+    """Appends the sponsor footer below the signature (or body).
 
     Plain-text emails are built outside of the renderer and stay untouched.
     """
-
-    verbose_name = gettext_lazy("Default with sponsors")
-    identifier = "gultix_sponsors"
-    thumbnail_filename = "pretixbase/email/thumb.png"  # reuse host thumbnail
-    template_name = "gultix_sponsors/email/sponsors_wrapper.html"
 
     def render(
         self,
@@ -39,3 +34,23 @@ class GultixSponsorsMailRenderer(ClassicMailRenderer):
             if sponsors:
                 tiers.append((tier, sponsors))
         return tiers
+
+
+class GultixSponsorsMailRenderer(SponsorFooterMixin, ClassicMailRenderer):
+    """pretix default layout plus a sponsor footer."""
+
+    verbose_name = gettext_lazy("Default with sponsors")
+    identifier = "gultix_sponsors"
+    thumbnail_filename = "pretixbase/email/thumb.png"  # reuse host thumbnail
+    template_name = "gultix_sponsors/email/sponsors_wrapper.html"
+
+
+class GultixSponsorsSimpleLogoMailRenderer(
+    SponsorFooterMixin, UnembellishedMailRenderer
+):
+    """Simple-with-logo layout plus a sponsor footer."""
+
+    verbose_name = gettext_lazy("Simple with logo and sponsors")
+    identifier = "gultix_sponsors_simple_logo"
+    thumbnail_filename = "pretixbase/email/thumb_simple_logo.png"
+    template_name = "gultix_sponsors/email/simple_logo_sponsors.html"

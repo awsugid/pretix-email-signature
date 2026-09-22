@@ -82,6 +82,22 @@ class RendererRenderingTest(RendererTestMixin, TestCase):
         self.assertIn("gultix-sponsors", html)
         self.assertGreater(html.index("gultix-sponsors"), html.index("Hello body"))
 
+    def test_sponsored_by_heading_shown_once_before_tiers(self):
+        event = self.make_event()
+        gold = SponsorTier.objects.create(event=event, name="Gold")
+        silver = SponsorTier.objects.create(event=event, name="Silver", position=2)
+        self.make_sponsor(gold, "Acme")
+        self.make_sponsor(silver, "Linked")
+        html = self.render(event)
+        self.assertEqual(html.count("Sponsored by"), 1)
+        self.assertLess(html.index("Sponsored by"), html.index("Gold"))
+        self.assertLess(html.index("Sponsored by"), html.index("Silver"))
+
+    def test_sponsored_by_heading_absent_when_empty(self):
+        event = self.make_event()
+        html = self.render(event)
+        self.assertNotIn("Sponsored by", html)
+
     def test_unpublished_sponsors_hidden(self):
         event = self.make_event()
         tier = SponsorTier.objects.create(event=event, name="Gold")

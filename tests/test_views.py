@@ -1,6 +1,7 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
+from pathlib import Path
 from pretix.base.models import Event, Organizer, Team, User
 
 from gultix_sponsors.models import Sponsor, SponsorTier
@@ -118,6 +119,44 @@ class IsolationTest(ViewTestMixin, TestCase):
         )
         self.assertEqual(response.status_code, 200)  # form error, no redirect
         self.assertFalse(Sponsor.objects.filter(name="Evil").exists())
+
+
+class ThumbnailMarkupTest(ViewTestMixin, TestCase):
+    """Contract for CSP-safe logo thumbnails (see memory implementation/thumbnail).
+
+    pretix control CSP ships style-src without 'unsafe-inline', so browsers drop
+    inline style attributes; sizing must come from a plugin stylesheet linked
+    via the custom_header block.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user)
+
+    def test_index_links_plugin_stylesheet(self):
+        self.make_tier()
+        response = self.client.get(self.index_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="/static/gultix_sponsors/css/control.css"')
+
+    def test_thumbnail_css_ships_size_constraints(self):
+        from django.contrib.staticfiles import finders
+
+        path = finders.find("gultix_sponsors/css/control.css")
+        self.assertIsNotNone(path)
+        css = Path(path).read_text()
+        self.assertIn("max-width: 96px", css)
+        self.assertIn("max-height: 64px", css)
+
+    def test_logo_img_uses_class_not_inline_style(self):
+        tier = self.make_tier()
+        self.make_sponsor(tier, "Acme")
+        response = self.client.get(self.index_url())
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertEqual(html.count('class="sponsor-thumb"'), 1)
+        # regression guard: inline style attr is CSP-blocked, must not come back
+        self.assertNotIn('style="height: 32px', html)
 
 
 class CrudTest(ViewTestMixin, TestCase):

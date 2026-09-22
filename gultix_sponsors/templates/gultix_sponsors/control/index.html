@@ -1,5 +1,9 @@
 {% extends "pretixcontrol/event/base.html" %}
-{% load i18n %}
+{% load i18n static %}
+{% block custom_header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'gultix_sponsors/css/control.css' %}">
+{% endblock %}
 {% block title %}{% trans "Sponsors" %}{% endblock %}
 {% block content %}
     <h1>
@@ -65,7 +69,7 @@
                                 <td><strong>{{ sponsor.name }}</strong></td>
                                 <td>
                                     {% if sponsor.logo %}
-                                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" style="height: 32px;">
+                                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" class="sponsor-thumb">
                                     {% else %}
                                         <span class="text-muted">{% trans "None" %}</span>
                                     {% endif %}

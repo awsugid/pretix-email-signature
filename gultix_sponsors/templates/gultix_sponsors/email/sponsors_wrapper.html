@@ -10,12 +10,13 @@
                     <table cellpadding="20"><tr><td>
                 <![endif]-->
                 <div class="content gultix-sponsors">
+                                    <h2 style="font-size: 16px; line-height: 24px; text-align: center; margin: 0 0 16px;">{% trans "Sponsored by" %}</h2>
                     {% for tier, sponsors in event.gultix_sponsor_footer_tiers %}
                         <div style="margin: 0 0 16px;">
                             <div style="font-size: 12px; line-height: 16px; color: #999999; text-align: center; letter-spacing: 1px; margin: 0 0 8px;">{{ tier.name }}</div>
                             <div style="text-align: center;">
                                 {% for sponsor in sponsors %}
-                                    <div style="display: inline-block; vertical-align: top; text-align: center; margin: 8px; max-width: {{ tier.logo_width }}px;">
+                                    <div style="display: inline-block; vertical-align: middle; text-align: center; margin: 8px; max-width: {{ tier.logo_width }}px;">
                                         {% if sponsor.website %}<a href="{{ sponsor.website }}" target="_blank">{% endif %}<img src="{% if sponsor.logo.url|first == '/' %}{{ site_url }}{% endif %}{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" width="{{ tier.logo_width }}" style="display: inline-block; width: {{ tier.logo_width }}px; max-width: 100%; height: auto; border: 0;">{% if sponsor.website %}</a>{% endif %}
                                         <div style="font-size: 12px; line-height: 16px; color: #999999; margin: 4px 0 0;">{{ sponsor.name }}</div>
                                     </div>

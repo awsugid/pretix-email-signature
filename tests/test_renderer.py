@@ -210,6 +210,49 @@ class RendererRenderingTest(RendererTestMixin, TestCase):
         self.assertLess(footer.index("GoldFirst"), footer.index("GoldSecond"))
 
 
+class RendererStressMatrixTest(RendererTestMixin, TestCase):
+    """Stress matrix from the local browser run: every supported width,
+    mixed aspect ratios and unbreakable long names."""
+
+    def test_all_supported_widths_render_exactly(self):
+        event = self.make_event()
+        for i, width in enumerate((40, 100, 150, 200, 300)):
+            tier = SponsorTier.objects.create(
+                event=event, name="W%d" % width, logo_width=width, position=i
+            )
+            self.make_sponsor(tier, "S%d" % width)
+        html = self.render(event)
+        for width in (40, 100, 150, 200, 300):
+            self.assertIn('width="%d"' % width, html)
+            self.assertIn("width: %dpx" % width, html)
+            self.assertIn("max-width: %dpx" % width, html)
+        # aspect ratio is preserved via height: auto
+        self.assertIn("height: auto", html)
+
+    def test_aspect_ratio_preserved_via_height_auto(self):
+        event = self.make_event()
+        tier = SponsorTier.objects.create(event=event, name="Gold", logo_width=300)
+        self.make_sponsor(tier, "Wide")
+        html = self.render(event)
+        img = next(c for c in html.split("<img") if 'alt="Wide"' in c)
+        self.assertIn('width="300"', img)
+        self.assertIn("height: auto", img)
+        # no fixed height attribute may fight the auto style
+        self.assertNotIn('height="', img)
+
+    def test_long_unbreakable_names_wrap(self):
+        event = self.make_event()
+        tier = SponsorTier.objects.create(event=event, name="T" * 100, logo_width=100)
+        self.make_sponsor(tier, "X" * 190)
+        html = self.render(event)
+        footer = html.split("gultix-sponsors", 1)[1]
+        # tier heading and sponsor name must both break instead of
+        # overflowing the email container (word-wrap works in Outlook 2007+)
+        self.assertEqual(footer.count("word-wrap: break-word"), 2)
+        self.assertIn("overflow-wrap: break-word", footer)
+        self.assertIn("X" * 190, footer)
+
+
 class NavSignalTest(TestCase):
     def _request(self, granted, resolver_match=None):
         from types import SimpleNamespace

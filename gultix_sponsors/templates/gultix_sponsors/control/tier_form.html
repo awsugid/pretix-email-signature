@@ -29,7 +29,6 @@
             {% bootstrap_field form.logo_width layout="control" %}
         {% endif %}
         {% if form.custom_logo_width %}{% bootstrap_field form.custom_logo_width layout="control" %}{% endif %}
-        {% if form.position %}{% bootstrap_field form.position layout="control" %}{% endif %}
         <div class="form-group submit-group">
             <a href="{% url 'plugins:gultix_sponsors:index' organizer=request.event.organizer.slug event=request.event.slug %}"
                class="btn btn-default btn-cancel">{% trans "Cancel" %}</a>

@@ -33,6 +33,28 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="pull-right flip">
+                        <form method="post"
+                              action="{% url 'plugins:gultix_sponsors:tier.move' organizer=request.event.organizer.slug event=request.event.slug tier=tier.pk direction='up' %}"
+                              class="gultix-move-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-default btn-sm"
+                                    title="{% trans "Move tier up" %}"
+                                    aria-label="{% blocktrans with name=tier.name %}Move tier {{ name }} up{% endblocktrans %}"
+                                    {% if forloop.first %}disabled{% endif %}>
+                                <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        <form method="post"
+                              action="{% url 'plugins:gultix_sponsors:tier.move' organizer=request.event.organizer.slug event=request.event.slug tier=tier.pk direction='down' %}"
+                              class="gultix-move-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-default btn-sm"
+                                    title="{% trans "Move tier down" %}"
+                                    aria-label="{% blocktrans with name=tier.name %}Move tier {{ name }} down{% endblocktrans %}"
+                                    {% if forloop.last %}disabled{% endif %}>
+                                <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                            </button>
+                        </form>
                         <a title="{% trans "Edit tier" %}"
                            href="{% url 'plugins:gultix_sponsors:tier.edit' organizer=request.event.organizer.slug event=request.event.slug tier=tier.pk %}"
                            class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
@@ -79,7 +101,30 @@
                                         <a href="{{ sponsor.website }}" target="_blank" rel="noopener noreferrer">{{ sponsor.website }}</a>
                                     {% endif %}
                                 </td>
-                                <td>{{ sponsor.position }}</td>
+                                <td class="gultix-move">
+                                    <form method="post"
+                                          action="{% url 'plugins:gultix_sponsors:sponsor.move' organizer=request.event.organizer.slug event=request.event.slug sponsor=sponsor.pk direction='up' %}"
+                                          class="gultix-move-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-default btn-sm"
+                                                title="{% trans "Move sponsor up" %}"
+                                                aria-label="{% blocktrans with name=sponsor.name %}Move sponsor {{ name }} up{% endblocktrans %}"
+                                                {% if forloop.first %}disabled{% endif %}>
+                                            <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post"
+                                          action="{% url 'plugins:gultix_sponsors:sponsor.move' organizer=request.event.organizer.slug event=request.event.slug sponsor=sponsor.pk direction='down' %}"
+                                          class="gultix-move-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-default btn-sm"
+                                                title="{% trans "Move sponsor down" %}"
+                                                aria-label="{% blocktrans with name=sponsor.name %}Move sponsor {{ name }} down{% endblocktrans %}"
+                                                {% if forloop.last %}disabled{% endif %}>
+                                            <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </td>
                                 <td>
                                     {% if sponsor.published %}
                                         <span class="label label-success">{% trans "published" %}</span>

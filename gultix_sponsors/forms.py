@@ -82,7 +82,7 @@ class SponsorTierForm(forms.ModelForm):
 
     class Meta:
         model = SponsorTier
-        fields = ["name", "position", "logo_width"]
+        fields = ["name", "logo_width"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -120,7 +120,9 @@ class SponsorForm(forms.ModelForm):
 
     class Meta:
         model = Sponsor
-        fields = ["tier", "name", "logo", "website", "position", "published"]
+        # "position" stays model-only: order is edited with up/down buttons
+        # on the overview page, never through this form.
+        fields = ["tier", "name", "logo", "website", "published"]
 
     def __init__(self, *args, event=None, **kwargs):
         super().__init__(*args, **kwargs)

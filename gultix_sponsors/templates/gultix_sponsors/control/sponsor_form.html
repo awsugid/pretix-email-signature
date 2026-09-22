@@ -31,7 +31,6 @@
         {% if form.name %}{% bootstrap_field form.name layout="control" %}{% endif %}
         {% if form.logo %}{% bootstrap_field form.logo layout="control" %}{% endif %}
         {% if form.website %}{% bootstrap_field form.website layout="control" %}{% endif %}
-        {% if form.position %}{% bootstrap_field form.position layout="control" %}{% endif %}
         {% if form.published %}{% bootstrap_field form.published layout="control" %}{% endif %}
         <div class="form-group submit-group">
             <a href="{% url 'plugins:gultix_sponsors:index' organizer=request.event.organizer.slug event=request.event.slug %}"

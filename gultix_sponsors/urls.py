@@ -19,6 +19,11 @@ urlpatterns = [
         name="tier.edit",
     ),
     re_path(
+        r"^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/gultix_sponsors/tiers/(?P<tier>\d+)/move/(?P<direction>up|down)$",
+        views.TierMove.as_view(),
+        name="tier.move",
+    ),
+    re_path(
         r"^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/gultix_sponsors/tiers/(?P<tier>\d+)/delete$",
         views.TierDelete.as_view(),
         name="tier.delete",
@@ -32,6 +37,11 @@ urlpatterns = [
         r"^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/gultix_sponsors/sponsors/(?P<sponsor>\d+)/edit$",
         views.SponsorUpdate.as_view(),
         name="sponsor.edit",
+    ),
+    re_path(
+        r"^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/gultix_sponsors/sponsors/(?P<sponsor>\d+)/move/(?P<direction>up|down)$",
+        views.SponsorMove.as_view(),
+        name="sponsor.move",
     ),
     re_path(
         r"^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/gultix_sponsors/sponsors/(?P<sponsor>\d+)/delete$",

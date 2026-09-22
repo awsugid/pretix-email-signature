@@ -5,3 +5,15 @@
     max-width: 96px;
     max-height: 64px;
 }
+
+/* Up/down reorder buttons: forms must sit inline with the other row
+   controls without bootstrap's default form spacing. */
+.gultix-move-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.gultix-move .btn {
+    padding-left: 6px;
+    padding-right: 6px;
+}

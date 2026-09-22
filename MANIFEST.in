@@ -1,0 +1,2 @@
+recursive-include gultix_sponsors/templates *
+include LICENSE

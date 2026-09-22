@@ -1,0 +1,28 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% block title %}
+    {% if is_tier %}{% trans "Delete sponsor tier" %}{% else %}{% trans "Delete sponsor" %}{% endif %}
+{% endblock %}
+{% block content %}
+    <h1>
+        {% if is_tier %}{% trans "Delete sponsor tier" %}{% else %}{% trans "Delete sponsor" %}{% endif %}
+    </h1>
+    <form action="" method="post" class="form-horizontal">
+        {% csrf_token %}
+        <p>
+            {% blocktrans with name=object.name %}Are you sure you want to delete <strong>{{ name }}</strong>?{% endblocktrans %}
+        </p>
+        {% if is_tier and object.sponsors.count %}
+            <div class="alert alert-warning">
+                {% with n=object.sponsors.count %}
+                    {% blocktrans trimmed count counter=n %}This will also delete {{ counter }} sponsor.{% plural %}This will also delete {{ counter }} sponsors.{% endblocktrans %}
+                {% endwith %}
+            </div>
+        {% endif %}
+        <div class="form-group submit-group">
+            <a href="{% url 'plugins:gultix_sponsors:index' organizer=request.event.organizer.slug event=request.event.slug %}"
+               class="btn btn-default btn-cancel">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-danger btn-save">{% trans "Delete" %}</button>
+        </div>
+    </form>
+{% endblock %}

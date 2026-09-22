@@ -1,0 +1,4 @@
+[plugin]
+package = "gultix_sponsors"
+modules = [ "gultix_sponsors" ]
+marketplace_name = "gultix-sponsors"

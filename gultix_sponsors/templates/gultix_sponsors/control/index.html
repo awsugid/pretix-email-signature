@@ -1,0 +1,117 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Sponsors" %}{% endblock %}
+{% block content %}
+    <h1>
+        {% trans "Sponsors" %}
+        <a href="{% url 'plugins:gultix_sponsors:tier.add' organizer=request.event.organizer.slug event=request.event.slug %}"
+           class="btn btn-primary">
+            <i class="fa fa-plus"></i> {% trans "New tier" %}
+        </a>
+    </h1>
+    <p class="text-muted">
+        {% blocktrans trimmed %}
+            Sponsor tiers group sponsors that share the same logo width in the email footer of this event.
+        {% endblocktrans %}
+    </p>
+    {% if tiers|length == 0 %}
+        <div class="empty-collection">
+            <p>
+                {% blocktrans trimmed %}
+                    You haven't created any sponsor tiers yet.
+                {% endblocktrans %}
+            </p>
+            <a href="{% url 'plugins:gultix_sponsors:tier.add' organizer=request.event.organizer.slug event=request.event.slug %}"
+               class="btn btn-primary btn-lg"><i class="fa fa-plus"></i> {% trans "Create a new tier" %}</a>
+        </div>
+    {% else %}
+        {% for tier in tiers %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="pull-right flip">
+                        <a title="{% trans "Edit tier" %}"
+                           href="{% url 'plugins:gultix_sponsors:tier.edit' organizer=request.event.organizer.slug event=request.event.slug tier=tier.pk %}"
+                           class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                        <a title="{% trans "Delete tier" %}"
+                           href="{% url 'plugins:gultix_sponsors:tier.delete' organizer=request.event.organizer.slug event=request.event.slug tier=tier.pk %}"
+                           class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></a>
+                    </div>
+                    <h3 class="panel-title">
+                        <strong>{{ tier.name }}</strong>
+                        <small class="text-muted">
+                            {% if tier.logo_width == 100 %}{% trans "Small" %}{% elif tier.logo_width == 150 %}{% trans "Medium" %}{% elif tier.logo_width == 200 %}{% trans "Large" %}{% else %}{% trans "Custom" %}{% endif %}
+                            · {{ tier.logo_width }} px ·
+                            {% with n=tier.sponsors.all|length %}
+                                {% blocktrans trimmed count counter=n %}{{ counter }} sponsor{% plural %}{{ counter }} sponsors{% endblocktrans %}
+                            {% endwith %}
+                        </small>
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Sponsor" %}</th>
+                            <th>{% trans "Logo" %}</th>
+                            <th>{% trans "Website" %}</th>
+                            <th>{% trans "Order" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th class="action-col-2"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sponsor in tier.sponsors.all %}
+                            <tr>
+                                <td><strong>{{ sponsor.name }}</strong></td>
+                                <td>
+                                    {% if sponsor.logo %}
+                                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" style="height: 32px;">
+                                    {% else %}
+                                        <span class="text-muted">{% trans "None" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sponsor.website %}
+                                        <a href="{{ sponsor.website }}" target="_blank" rel="noopener noreferrer">{{ sponsor.website }}</a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ sponsor.position }}</td>
+                                <td>
+                                    {% if sponsor.published %}
+                                        <span class="label label-success">{% trans "published" %}</span>
+                                    {% else %}
+                                        <span class="label label-default">{% trans "unpublished" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right flip">
+                                    <a title="{% trans "Edit" %}"
+                                       href="{% url 'plugins:gultix_sponsors:sponsor.edit' organizer=request.event.organizer.slug event=request.event.slug sponsor=sponsor.pk %}"
+                                       class="btn btn-default btn-sm"><i class="fa fa-edit"></i></a>
+                                    <a title="{% trans "Delete" %}"
+                                       href="{% url 'plugins:gultix_sponsors:sponsor.delete' organizer=request.event.organizer.slug event=request.event.slug sponsor=sponsor.pk %}"
+                                       class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <span class="text-muted">{% trans "No sponsors in this tier yet." %}</span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="6">
+                                <a href="{% url 'plugins:gultix_sponsors:sponsor.add' organizer=request.event.organizer.slug event=request.event.slug %}?tier={{ tier.pk }}">
+                                    <i class="fa fa-plus"></i> {% trans "Add sponsor to this tier" %}
+                                </a>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

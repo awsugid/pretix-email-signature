@@ -1,0 +1,42 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% load bootstrap3 %}
+{% block title %}
+    {% if sponsor %}
+        {% blocktrans with name=sponsor.name %}Sponsor: {{ name }}{% endblocktrans %}
+    {% else %}
+        {% trans "New sponsor" %}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h1>
+        {% if sponsor %}
+            {% blocktrans with name=sponsor.name %}Sponsor: {{ name }}{% endblocktrans %}
+        {% else %}
+            {% trans "New sponsor" %}
+        {% endif %}
+    </h1>
+    <form action="" method="post" class="form-horizontal" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% if sponsor and sponsor.logo %}
+            <div class="form-group">
+                <label class="col-md-3 control-label">{% trans "Current logo" %}</label>
+                <div class="col-md-9">
+                    <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" style="height: 60px;">
+                </div>
+            </div>
+        {% endif %}
+        {% if form.tier %}{% bootstrap_field form.tier layout="control" %}{% endif %}
+        {% if form.name %}{% bootstrap_field form.name layout="control" %}{% endif %}
+        {% if form.logo %}{% bootstrap_field form.logo layout="control" %}{% endif %}
+        {% if form.website %}{% bootstrap_field form.website layout="control" %}{% endif %}
+        {% if form.position %}{% bootstrap_field form.position layout="control" %}{% endif %}
+        {% if form.published %}{% bootstrap_field form.published layout="control" %}{% endif %}
+        <div class="form-group submit-group">
+            <a href="{% url 'plugins:gultix_sponsors:index' organizer=request.event.organizer.slug event=request.event.slug %}"
+               class="btn btn-default btn-cancel">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-primary btn-save">{% trans "Save" %}</button>
+        </div>
+    </form>
+{% endblock %}

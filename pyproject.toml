@@ -1,0 +1,43 @@
+[project]
+name = "gultix_sponsors"
+dynamic = ["version"]
+description = "Show per-event sponsor logos in ordered tiers below the email signature, for emails sent with the event's selected mail renderer"
+readme = "README.rst"
+license = "Apache-2.0"
+keywords = ["pretix"]
+authors = [
+    {name = "Avei", email = "muhammadabdulazizalghofari@gmail.com"},
+]
+maintainers = [
+    {name = "Avei", email = "muhammadabdulazizalghofari@gmail.com"},
+]
+
+dependencies = [
+]
+
+[project.entry-points."pretix.plugin"]
+gultix_sponsors = "gultix_sponsors:PretixPluginMeta"
+
+[project.entry-points."distutils.commands"]
+build = "pretix_plugin_build.build:CustomBuild"
+
+[build-system]
+requires = [
+    "setuptools",
+    "pretix-plugin-build",
+]
+
+[project.urls]
+homepage = "https://github.com/awsugid/pretix-email-signature"
+repository = "https://github.com/awsugid/pretix-email-signature"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "gultix_sponsors.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["gultix_sponsors*"]
+exclude = ["gultix_sponsors.templates*"]
+namespaces = false

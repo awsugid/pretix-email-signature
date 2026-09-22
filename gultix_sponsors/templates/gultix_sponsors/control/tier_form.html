@@ -1,0 +1,39 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% load bootstrap3 %}
+{% block title %}
+    {% if sponsor_tier %}
+        {% blocktrans with name=sponsor_tier.name %}Sponsor tier: {{ name }}{% endblocktrans %}
+    {% else %}
+        {% trans "New sponsor tier" %}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <h1>
+        {% if sponsor_tier %}
+            {% blocktrans with name=sponsor_tier.name %}Sponsor tier: {{ name }}{% endblocktrans %}
+        {% else %}
+            {% trans "New sponsor tier" %}
+        {% endif %}
+    </h1>
+    <form action="" method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% if form.name %}{% bootstrap_field form.name layout="control" %}{% endif %}
+        {% if form.logo_width %}
+            <div class="alert alert-info">
+                {% blocktrans trimmed %}
+                    Pick a preset logo width, or choose "Custom" and enter your own value below.
+                {% endblocktrans %}
+            </div>
+            {% bootstrap_field form.logo_width layout="control" %}
+        {% endif %}
+        {% if form.custom_logo_width %}{% bootstrap_field form.custom_logo_width layout="control" %}{% endif %}
+        {% if form.position %}{% bootstrap_field form.position layout="control" %}{% endif %}
+        <div class="form-group submit-group">
+            <a href="{% url 'plugins:gultix_sponsors:index' organizer=request.event.organizer.slug event=request.event.slug %}"
+               class="btn btn-default btn-cancel">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-primary btn-save">{% trans "Save" %}</button>
+        </div>
+    </form>
+{% endblock %}
